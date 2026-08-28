@@ -5,6 +5,9 @@ st.title("Chef AI")
 
 question = st.text_input("Ask a cooking question...")
 
+# Performance optimization: Cache responses for identical questions to avoid
+# repeated expensive LLM inference via Ollama (~1-5s per request saved).
+@st.cache_data
 def chef_ai(question):
     response = ollama.chat(
         model='mistral',
