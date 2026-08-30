@@ -5,6 +5,10 @@ st.title("Chef AI")
 
 question = st.text_input("Ask a cooking question...")
 
+# ⚡ Performance Optimization: Cache response for duplicate questions
+# LLM generation calls via ollama.chat are computationally expensive (100ms - several seconds).
+# @st.cache_data memoizes outputs for identical inputs, turning repeated queries into O(1) instant responses (~0ms).
+@st.cache_data
 def chef_ai(question):
     response = ollama.chat(
         model='mistral',
