@@ -5,6 +5,9 @@ st.title("Chef AI")
 
 question = st.text_input("Ask a cooking question...")
 
+# Performance optimization: Cache responses for identical cooking questions
+# to prevent redundant LLM API calls and improve response latency.
+@st.cache_data
 def chef_ai(question):
     response = ollama.chat(
         model='mistral',
