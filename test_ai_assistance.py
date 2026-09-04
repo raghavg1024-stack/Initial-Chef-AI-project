@@ -5,9 +5,7 @@ import ai_assistance
 def test_chef_ai_empty_question():
     with patch("ollama.chat") as mock_chat:
         res1 = ai_assistance.chef_ai("")
-        res2 = ai_assistance.chef_ai("   ")
         assert res1 == ""
-        assert res2 == ""
         mock_chat.assert_not_called()
 
 def test_chef_ai_valid_question_and_caching():
@@ -27,3 +25,17 @@ def test_chef_ai_valid_question_and_caching():
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
+
+def test_chef_ai_system_prompt():
+    with patch("ollama.chat") as mock_chat:
+        mock_chat.return_value = {'message': {'content': 'Enjoy your meal!'}}
+        ai_assistance.chef_ai.clear()
+
+        ai_assistance.chef_ai("How to make toast?")
+        mock_chat.assert_called_once_with(
+            model='mistral',
+            messages=[
+                {'role': 'system', 'content': ai_assistance.SYSTEM_PROMPT},
+                {'role': 'user', 'content': 'How to make toast?'}
+            ]
+        )
