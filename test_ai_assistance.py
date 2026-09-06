@@ -27,3 +27,21 @@ def test_chef_ai_valid_question_and_caching():
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
+
+def test_chef_ai_whitespace_normalization():
+    with patch("ollama.chat") as mock_chat:
+        mock_chat.return_value = {'message': {'content': 'Grill pizza on stone.'}}
+
+        ai_assistance.chef_ai.clear()
+
+        query = "How to make pizza?"
+        res1 = ai_assistance.chef_ai(query)
+        assert res1 == 'Grill pizza on stone.'
+        assert mock_chat.call_count == 1
+
+        # Asking with whitespace-normalized query hits cache without calling ollama.chat again
+        query_padded = "   How to make pizza?   "
+        query_clean = query_padded.strip()
+        res2 = ai_assistance.chef_ai(query_clean)
+        assert res2 == 'Grill pizza on stone.'
+        assert mock_chat.call_count == 1
