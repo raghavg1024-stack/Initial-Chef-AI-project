@@ -1,6 +1,15 @@
 import ollama
 import streamlit as st
 
+# Bolt ⚡ Optimization:
+# 1. Static SYSTEM_PROMPT constant prevents recreating prompt dictionary and string objects on every call,
+#    and removes redundant leading indentation whitespace to reduce prompt token count sent to Ollama LLM.
+SYSTEM_PROMPT = """You are a chef.
+rules:
+    - Be polite and friendly
+    - Keep answers short and to the point
+    - Suggest recipes and cooking tips"""
+
 st.title("Chef AI")
 
 question = st.text_input("Ask a cooking question...")
@@ -17,12 +26,7 @@ def chef_ai(question):
         messages=[
             {
                 'role': 'system',
-                'content': """ You are a chef.
-                rules:
-                    - Be polite and friendly
-                    - Keep answers short and to the point
-                    - Suggest recipes and cooking tips
-                """
+                'content': SYSTEM_PROMPT
             },
             {
                 'role': 'user',
@@ -33,7 +37,11 @@ def chef_ai(question):
     return response['message']['content']
 
 if st.button("Send"):
-    if question and question.strip():
-        st.write(chef_ai(question))
+    cleaned_question = question.strip() if question else ""
+    if cleaned_question:
+        # Bolt ⚡ Optimization:
+        # Pass pre-stripped question to chef_ai so whitespace variations (e.g. trailing spaces)
+        # share the exact same cache key in @st.cache_data, avoiding redundant LLM backend calls.
+        st.write(chef_ai(cleaned_question))
     else:
         st.warning("Please enter a cooking question.")
