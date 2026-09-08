@@ -27,3 +27,7 @@ def test_chef_ai_valid_question_and_caching():
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
+
+        # Verify system prompt content used in ollama.chat call
+        called_messages = mock_chat.call_args[1]['messages']
+        assert called_messages[0]['content'] == ai_assistance.SYSTEM_PROMPT
