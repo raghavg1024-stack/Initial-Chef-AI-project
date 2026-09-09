@@ -1,0 +1,3 @@
+## 2026-09-09 - Streamlit Cache Normalization for LLM Queries
+**Learning:** In Streamlit applications using `@st.cache_data`, caching directly on raw user inputs (such as text input with leading/trailing whitespace) leads to cache misses for semantically identical queries. Because string hashing distinguishes `"query"` from `" query "`, duplicate calls to expensive LLM backends occur. Pre-normalizing input before passing to the cached function ensures cache key identity across whitespace variations.
+**Action:** Always strip/sanitize string inputs before delegating to `@st.cache_data` decorated functions, and define static prompt structures at module scope to prevent re-allocation on every script rerun or function invocation.
