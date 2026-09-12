@@ -22,6 +22,10 @@ def test_chef_ai_valid_question_and_caching():
         assert res1 == 'Boil water and add pasta.'
         assert mock_chat.call_count == 1
 
+        # Verify that ollama.chat was called with SYSTEM_PROMPT constant
+        args, kwargs = mock_chat.call_args
+        assert kwargs['messages'][0] == ai_assistance.SYSTEM_PROMPT
+
         # Second call with identical input should be served from cache
         res2 = ai_assistance.chef_ai("How to boil pasta?")
         assert res2 == 'Boil water and add pasta.'
