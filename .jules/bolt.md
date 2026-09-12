@@ -1,0 +1,3 @@
+## 2026-03-30 - Streamlit Cache Key Normalization & Prompt Constant Allocation
+**Learning:** In Streamlit apps with `@st.cache_data`, passing un-normalized string arguments (e.g. `question` with trailing whitespace from `st.text_input`) causes cache misses across identical logical queries, leading to redundant LLM invocations. Additionally, defining system prompt dictionaries inline inside cached functions creates unnecessary allocations on cache misses.
+**Action:** Always strip/normalize input strings before passing them into `@st.cache_data` functions, and extract static system prompts as module-level constants.
