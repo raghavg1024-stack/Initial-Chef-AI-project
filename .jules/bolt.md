@@ -1,0 +1,3 @@
+## 2025-05-18 - Streamlit Cache Key Normalization & Prompt Allocation
+**Learning:** Streamlit `@st.cache_data` hashes exact input function parameters. When receiving raw user input from `st.text_input`, leading/trailing whitespace variations cause cache misses and trigger redundant, expensive LLM calls. Normalizing input strings prior to calling cached functions maximizes cache hit rate. Additionally, extracting static system prompts to module scope prevents unnecessary dictionary re-allocations on LLM requests.
+**Action:** Always normalize user input strings before passing them to `@st.cache_data` decorated functions and declare static LLM prompts at module level.
