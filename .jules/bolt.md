@@ -1,0 +1,3 @@
+## 2026-03-30 - Standardize LLM System Message & Normalizing Input Whitespace
+**Learning:** Multiline raw triple-quoted strings inside LLM call payloads carry indentation spaces into every LLM API payload. Converting system prompts to module-level clean string constants saves payload bytes and reduces per-request dictionary allocation. Normalizing string whitespace before calling Streamlit cached functions increases cache hit rates when user input includes trailing whitespace.
+**Action:** Always pre-allocate static LLM system prompt dictionaries at module scope and strip input whitespace before hitting `@st.cache_data` decorated functions.
