@@ -6,34 +6,46 @@ st.title("Chef AI")
 question = st.text_input("Ask a cooking question...")
 
 # Bolt ⚡ Optimization:
-# Cache response results with @st.cache_data so duplicate/identical cooking queries
-# do not trigger redundant and expensive calls to the Ollama LLM backend.
+# 1. Static system message defined as module constant to avoid dict/string re-allocations on every invocation.
+# 2. Input queries are stripped to ensure queries with whitespace variations produce identical cache keys in @st.cache_data, avoiding redundant LLM calls.
+SYSTEM_MESSAGE = {
+    'role': 'system',
+    'content': """ You are a chef.
+    rules:
+        - Be polite and friendly
+        - Keep answers short and to the point
+        - Suggest recipes and cooking tips
+    """
+}
+
 @st.cache_data(show_spinner="Asking Chef AI...")
-def chef_ai(question):
-    if not question or not question.strip():
-        return ""
+def _cached_chef_ai(question):
     response = ollama.chat(
         model='mistral',
         messages=[
-            {
-                'role': 'system',
-                'content': """ You are a chef.
-                rules:
-                    - Be polite and friendly
-                    - Keep answers short and to the point
-                    - Suggest recipes and cooking tips
-                """
-            },
+            SYSTEM_MESSAGE,
             {
                 'role': 'user',
-                'content': question.strip()
+                'content': question
             }
         ]
     )
     return response['message']['content']
 
+def chef_ai(question):
+    if not question:
+        return ""
+    question = question.strip()
+    if not question:
+        return ""
+    return _cached_chef_ai(question)
+
+# Attach clear method for compatibility with tests and Streamlit cache clearing
+chef_ai.clear = _cached_chef_ai.clear
+
 if st.button("Send"):
-    if question and question.strip():
-        st.write(chef_ai(question))
+    clean_question = question.strip() if question else ""
+    if clean_question:
+        st.write(chef_ai(clean_question))
     else:
         st.warning("Please enter a cooking question.")
