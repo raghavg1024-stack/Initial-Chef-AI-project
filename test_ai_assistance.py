@@ -18,12 +18,12 @@ def test_chef_ai_valid_question_and_caching():
         ai_assistance.chef_ai.clear()
 
         # First call should invoke ollama.chat
-        res1 = ai_assistance.chef_ai("How to boil pasta?")
+        res1 = ai_assistance.chef_ai("How to boil pasta?".strip())
         assert res1 == 'Boil water and add pasta.'
         assert mock_chat.call_count == 1
 
-        # Second call with identical input should be served from cache
-        res2 = ai_assistance.chef_ai("How to boil pasta?")
+        # Second call with identical input or whitespace variations (normalized before call) should be served from cache
+        res2 = ai_assistance.chef_ai("   How to boil pasta?   ".strip())
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
