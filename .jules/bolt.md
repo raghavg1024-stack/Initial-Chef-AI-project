@@ -1,0 +1,3 @@
+## 2026-09-25 - Normalize Inputs Before Streamlit Caching
+**Learning:** Decorating a function with `@st.cache_data` caches arguments exactly as passed. If a function performs internal `question.strip()` inside the decorated function body, calls with `"pasta"` and `"  pasta  "` pass different arguments into the decorated function, resulting in cache misses and redundant expensive operations (like LLM API calls). By normalizing inputs before passing them into `@st.cache_data` (or wrapping the inner cached function), inputs with differing whitespace share the exact same cache entry.
+**Action:** Always ensure input normalization/stripping happens prior to `@st.cache_data` cache key evaluation.
