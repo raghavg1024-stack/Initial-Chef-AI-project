@@ -22,8 +22,12 @@ def test_chef_ai_valid_question_and_caching():
         assert res1 == 'Boil water and add pasta.'
         assert mock_chat.call_count == 1
 
-        # Second call with identical input should be served from cache
-        res2 = ai_assistance.chef_ai("How to boil pasta?")
+        # Check system prompt constant is used in call
+        call_args = mock_chat.call_args[1]
+        assert call_args['messages'][0]['content'] == ai_assistance.CHEF_SYSTEM_PROMPT
+
+        # Second call with whitespace-padded query should be served from cache after normalization
+        res2 = ai_assistance.chef_ai("  How to boil pasta?  ")
         assert res2 == 'Boil water and add pasta.'
-        # Call count remains 1 because cached output is returned without calling ollama.chat
+        # Call count remains 1 because normalized query matches cached key
         assert mock_chat.call_count == 1
