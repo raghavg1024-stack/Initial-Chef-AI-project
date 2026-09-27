@@ -1,0 +1,3 @@
+## 2026-09-27 - Streamlit Cache Key Normalization
+**Learning:** `@st.cache_data` hashes raw parameter arguments prior to function execution. When parameter cleanup/normalization (e.g., `.strip()`) occurs inside the cached function, identical semantic inputs with minor formatting differences (like leading/trailing whitespace or newlines) generate distinct cache keys and trigger duplicate calls to expensive backends.
+**Action:** Wrap `@st.cache_data` decorated functions with a outer function that normalizes arguments prior to caching, and re-export any API methods (like `.clear = _cached_fn.clear`) for backward compatibility.
