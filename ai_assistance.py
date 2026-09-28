@@ -34,6 +34,8 @@ def chef_ai(question):
 
 if st.button("Send"):
     if question and question.strip():
-        st.write(chef_ai(question))
+        # Bolt ⚡ Optimization: Pass stripped question so trailing/leading whitespace variations
+        # hit the same @st.cache_data cache entry rather than triggering redundant LLM calls.
+        st.write(chef_ai(question.strip()))
     else:
         st.warning("Please enter a cooking question.")
