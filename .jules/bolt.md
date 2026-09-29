@@ -1,0 +1,3 @@
+## 2026-09-03 - Keep Ollama models loaded in memory & hoist static prompts
+**Learning:** By default, Ollama unloads LLM models from memory shortly after requests complete. Passing `keep_alive='1h'` keeps the model warm in RAM/VRAM across user queries, eliminating cold-start model reloading latencies (~2-5 seconds). Additionally, hoisting static system prompts out of function calls avoids unnecessary string and dict allocations per request.
+**Action:** Always specify `keep_alive` when calling Ollama API in interactive applications like Streamlit, and hoist invariant prompt structures to module level.
