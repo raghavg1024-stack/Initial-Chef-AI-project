@@ -6,12 +6,11 @@ st.title("Chef AI")
 question = st.text_input("Ask a cooking question...")
 
 # Bolt ⚡ Optimization:
-# Cache response results with @st.cache_data so duplicate/identical cooking queries
-# do not trigger redundant and expensive calls to the Ollama LLM backend.
+# Normalize question (strip leading/trailing whitespace and lowercasing if applicable,
+# or strip whitespace) prior to caching so queries like "  how to boil pasta  " and
+# "how to boil pasta" share the exact same cached result, avoiding redundant expensive LLM calls.
 @st.cache_data(show_spinner="Asking Chef AI...")
-def chef_ai(question):
-    if not question or not question.strip():
-        return ""
+def _cached_chef_ai(normalized_question):
     response = ollama.chat(
         model='mistral',
         messages=[
@@ -26,11 +25,19 @@ def chef_ai(question):
             },
             {
                 'role': 'user',
-                'content': question.strip()
+                'content': normalized_question
             }
         ]
     )
     return response['message']['content']
+
+def chef_ai(question):
+    if not question or not question.strip():
+        return ""
+    return _cached_chef_ai(question.strip())
+
+# Expose cache clear helper on chef_ai for easy cache invalidation during testing/management
+chef_ai.clear = _cached_chef_ai.clear
 
 if st.button("Send"):
     if question and question.strip():
