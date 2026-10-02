@@ -27,3 +27,25 @@ def test_chef_ai_valid_question_and_caching():
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
+
+def test_chef_ai_whitespace_normalization_and_prompt_constant():
+    with patch("ollama.chat") as mock_chat:
+        mock_chat.return_value = {'message': {'content': 'Use a pan.'}}
+
+        ai_assistance.chef_ai.clear()
+
+        # Calling with stripped query
+        clean_q = "How to fry eggs?".strip()
+        res1 = ai_assistance.chef_ai(clean_q)
+        assert res1 == 'Use a pan.'
+        assert mock_chat.call_count == 1
+
+        # Verify system prompt constant is used in ollama.chat messages
+        called_messages = mock_chat.call_args[1]['messages']
+        assert called_messages[0] == ai_assistance.CHEF_SYSTEM_PROMPT
+        assert called_messages[1] == {'role': 'user', 'content': 'How to fry eggs?'}
+
+        # Calling with query that normalizes to same string
+        res2 = ai_assistance.chef_ai("How to fry eggs?".strip())
+        assert res2 == 'Use a pan.'
+        assert mock_chat.call_count == 1  # Cache hit!
