@@ -1,0 +1,3 @@
+## 2026-10-03 - Batching Streamlit Inputs & Constant System Message
+**Learning:** In Streamlit applications, unbound input components (like `st.text_input`) re-trigger full Python script reruns on every keystroke or blur event. Wrapping inputs in `st.form` batches changes and defers script execution until submit, drastically reducing server reruns and WebSocket chatter. Pre-allocating system message dictionaries at the module level also eliminates object re-allocation per call and avoids token overhead from unnecessary indentation.
+**Action:** Always wrap Streamlit query inputs in `st.form` and extract static LLM prompts to module-level constants.

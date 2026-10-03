@@ -3,7 +3,19 @@ import streamlit as st
 
 st.title("Chef AI")
 
-question = st.text_input("Ask a cooking question...")
+# Bolt ⚡ Optimization:
+# Pre-allocate system message dictionary as a module-level constant to eliminate
+# object allocation overhead per call and remove redundant leading indentation tokens.
+SYSTEM_MESSAGE = {
+    'role': 'system',
+    'content': (
+        " You are a chef.\n"
+        " rules:\n"
+        "     - Be polite and friendly\n"
+        "     - Keep answers short and to the point\n"
+        "     - Suggest recipes and cooking tips"
+    )
+}
 
 # Bolt ⚡ Optimization:
 # Cache response results with @st.cache_data so duplicate/identical cooking queries
@@ -15,15 +27,7 @@ def chef_ai(question):
     response = ollama.chat(
         model='mistral',
         messages=[
-            {
-                'role': 'system',
-                'content': """ You are a chef.
-                rules:
-                    - Be polite and friendly
-                    - Keep answers short and to the point
-                    - Suggest recipes and cooking tips
-                """
-            },
+            SYSTEM_MESSAGE,
             {
                 'role': 'user',
                 'content': question.strip()
@@ -32,7 +36,14 @@ def chef_ai(question):
     )
     return response['message']['content']
 
-if st.button("Send"):
+# Bolt ⚡ Optimization:
+# Batch input changes using st.form to prevent Streamlit from re-running the script
+# on every keystroke/blur event before the user submits their question.
+with st.form(key="chef_form"):
+    question = st.text_input("Ask a cooking question...")
+    submitted = st.form_submit_button("Send")
+
+if submitted:
     if question and question.strip():
         st.write(chef_ai(question))
     else:
