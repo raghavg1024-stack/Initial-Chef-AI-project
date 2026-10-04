@@ -1,0 +1,3 @@
+## 2026-10-04 - Normalize cached parameters prior to Streamlit `@st.cache_data` lookup
+**Learning:** Functions decorated with `@st.cache_data` cache based on exact parameter values. When user inputs contain leading/trailing whitespace, identical text queries fail cache lookup and cause redundant LLM calls. Splitting parameter cleaning into a wrapper function before the `@st.cache_data` decorated call ensures whitespace variations share cache hits.
+**Action:** Always sanitize/normalize input parameters (e.g., `.strip()`, lowercase if applicable) before passing them into `@st.cache_data` decorated functions.
