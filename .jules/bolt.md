@@ -1,0 +1,3 @@
+## 2025-05-18 - Input Normalization for Streamlit Caching
+**Learning:** In Streamlit applications, `@st.cache_data` hashes raw argument values before function body execution. If input strings (such as LLM queries) are stripped inside the cached function instead of prior to cache key evaluation, whitespace variations (`" pasta "` vs `"pasta"`) miss the cache and trigger duplicate expensive LLM calls.
+**Action:** Always normalize string arguments before passing them to `@st.cache_data` functions, or delegate from a public interface function that normalizes arguments to an internal cached function.

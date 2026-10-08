@@ -27,3 +27,21 @@ def test_chef_ai_valid_question_and_caching():
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
+
+def test_chef_ai_whitespace_normalization_caching():
+    with patch("ollama.chat") as mock_chat:
+        mock_chat.return_value = {'message': {'content': 'Sear the steak on high heat.'}}
+
+        # Clear Streamlit cache for test isolation
+        ai_assistance.chef_ai.clear()
+
+        # First call with untrimmed query
+        res1 = ai_assistance.chef_ai("  How to cook steak?  \n")
+        assert res1 == 'Sear the steak on high heat.'
+        assert mock_chat.call_count == 1
+
+        # Second call with trimmed variation should hit the cache
+        res2 = ai_assistance.chef_ai("How to cook steak?")
+        assert res2 == 'Sear the steak on high heat.'
+        # Call count remains 1 due to normalized cache hit
+        assert mock_chat.call_count == 1
