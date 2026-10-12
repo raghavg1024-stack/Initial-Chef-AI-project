@@ -27,3 +27,24 @@ def test_chef_ai_valid_question_and_caching():
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
+
+        # Third call with leading/trailing whitespace variations should ALSO hit cache
+        res3 = ai_assistance.chef_ai("   How to boil pasta?  ")
+        assert res3 == 'Boil water and add pasta.'
+        assert mock_chat.call_count == 1
+
+def test_system_prompt_structure():
+    with patch("ollama.chat") as mock_chat:
+        mock_chat.return_value = {'message': {'content': 'Pinch of salt.'}}
+
+        ai_assistance.chef_ai.clear()
+        ai_assistance.chef_ai("Salt tip")
+
+        mock_chat.assert_called_once()
+        _, kwargs = mock_chat.call_args
+        messages = kwargs.get('messages', [])
+        assert len(messages) == 2
+        assert messages[0]['role'] == 'system'
+        assert messages[0]['content'] == ai_assistance.SYSTEM_PROMPT
+        assert messages[1]['role'] == 'user'
+        assert messages[1]['content'] == "Salt tip"
