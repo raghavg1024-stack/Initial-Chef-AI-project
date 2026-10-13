@@ -1,0 +1,3 @@
+## 2026-09-03 - Clean system prompt whitespace and pre-allocated prompt dictionary
+**Learning:** Multiline docstrings/strings used for LLM system prompts in Python often introduce substantial whitespace and indentation overhead into requests. Cleaning prompt formatting and pre-allocating static prompt structures reduces dictionary allocation on every Streamlit rerun/execution and saves payload/token overhead for local LLM models like Ollama.
+**Action:** When constructing static LLM system messages, format them compactly without multiline indentation and pre-allocate the static dictionary at module scope.
