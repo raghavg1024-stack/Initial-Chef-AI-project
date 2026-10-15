@@ -27,3 +27,20 @@ def test_chef_ai_valid_question_and_caching():
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
+
+def test_chef_ai_whitespace_normalization_cache_hit():
+    with patch("ollama.chat") as mock_chat:
+        mock_chat.return_value = {'message': {'content': 'Use a ripe avocado.'}}
+
+        # Clear Streamlit cache for test isolation
+        ai_assistance.chef_ai.clear()
+
+        # First query without extra spaces
+        res1 = ai_assistance.chef_ai("How to make guacamole?")
+        assert res1 == 'Use a ripe avocado.'
+        assert mock_chat.call_count == 1
+
+        # Query with leading/trailing whitespace should hit the same cache entry
+        res2 = ai_assistance.chef_ai("   How to make guacamole?\n ")
+        assert res2 == 'Use a ripe avocado.'
+        assert mock_chat.call_count == 1
