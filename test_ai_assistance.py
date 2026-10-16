@@ -27,3 +27,22 @@ def test_chef_ai_valid_question_and_caching():
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
+
+def test_chef_ai_whitespace_normalized_caching():
+    with patch("ollama.chat") as mock_chat:
+        mock_chat.return_value = {'message': {'content': 'Use high heat.'}}
+
+        # Clear Streamlit cache for test isolation
+        ai_assistance.chef_ai.clear()
+
+        # Input normalization strips whitespace before calling cached function
+        unstripped_q = "  How to sear steak?  "
+        normalized_q = unstripped_q.strip()
+
+        res1 = ai_assistance.chef_ai(normalized_q)
+        res2 = ai_assistance.chef_ai("How to sear steak?")
+
+        assert res1 == 'Use high heat.'
+        assert res2 == 'Use high heat.'
+        # Second call hits cache because both use normalized query
+        assert mock_chat.call_count == 1
