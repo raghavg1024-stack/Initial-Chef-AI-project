@@ -6,31 +6,38 @@ st.title("Chef AI")
 question = st.text_input("Ask a cooking question...")
 
 # Bolt ⚡ Optimization:
-# Cache response results with @st.cache_data so duplicate/identical cooking queries
-# do not trigger redundant and expensive calls to the Ollama LLM backend.
+# 1. Module-level static prompt definition to avoid dict/string allocation overhead per call.
+# 2. Input sanitization (stripping) before calling `chef_ai` ensures trailing/leading whitespace
+#    variations (e.g., "pasta " vs "pasta") share the same `@st.cache_data` cache key, improving cache hit rates.
+SYSTEM_PROMPT = {
+    'role': 'system',
+    'content': """ You are a chef.
+    rules:
+        - Be polite and friendly
+        - Keep answers short and to the point
+        - Suggest recipes and cooking tips
+    """
+}
+
 @st.cache_data(show_spinner="Asking Chef AI...")
-def chef_ai(question):
-    if not question or not question.strip():
-        return ""
+def _get_chef_response(question: str) -> str:
     response = ollama.chat(
         model='mistral',
         messages=[
-            {
-                'role': 'system',
-                'content': """ You are a chef.
-                rules:
-                    - Be polite and friendly
-                    - Keep answers short and to the point
-                    - Suggest recipes and cooking tips
-                """
-            },
+            SYSTEM_PROMPT,
             {
                 'role': 'user',
-                'content': question.strip()
+                'content': question
             }
         ]
     )
     return response['message']['content']
+
+def chef_ai(question: str) -> str:
+    cleaned_question = question.strip() if question else ""
+    if not cleaned_question:
+        return ""
+    return _get_chef_response(cleaned_question)
 
 if st.button("Send"):
     if question and question.strip():
