@@ -22,6 +22,14 @@ def test_chef_ai_valid_question_and_caching():
         assert res1 == 'Boil water and add pasta.'
         assert mock_chat.call_count == 1
 
+        # Verify system prompt is passed without unnecessary leading whitespace/indents
+        kwargs = mock_chat.call_args.kwargs
+        messages = kwargs.get("messages", [])
+        system_msg = next((m for m in messages if m.get("role") == "system"), None)
+        assert system_msg is not None
+        assert not system_msg["content"].startswith(" ")
+        assert "    - Be polite" not in system_msg["content"]
+
         # Second call with identical input should be served from cache
         res2 = ai_assistance.chef_ai("How to boil pasta?")
         assert res2 == 'Boil water and add pasta.'

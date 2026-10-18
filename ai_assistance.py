@@ -12,17 +12,22 @@ question = st.text_input("Ask a cooking question...")
 def chef_ai(question):
     if not question or not question.strip():
         return ""
+    # Bolt ⚡ Optimization: Clean multiline whitespace from system prompt
+    # to minimize token overhead and request payload size sent to Ollama LLM.
+    system_prompt = (
+        "You are a chef.\n"
+        "rules:\n"
+        "- Be polite and friendly\n"
+        "- Keep answers short and to the point\n"
+        "- Suggest recipes and cooking tips"
+    )
+
     response = ollama.chat(
         model='mistral',
         messages=[
             {
                 'role': 'system',
-                'content': """ You are a chef.
-                rules:
-                    - Be polite and friendly
-                    - Keep answers short and to the point
-                    - Suggest recipes and cooking tips
-                """
+                'content': system_prompt
             },
             {
                 'role': 'user',
