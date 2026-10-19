@@ -1,6 +1,16 @@
 import ollama
 import streamlit as st
 
+# Bolt ⚡ Optimization:
+# Define SYSTEM_PROMPT at module level to avoid re-allocating system prompt text
+# and dictionary objects on every LLM query.
+SYSTEM_PROMPT = """ You are a chef.
+rules:
+    - Be polite and friendly
+    - Keep answers short and to the point
+    - Suggest recipes and cooking tips
+"""
+
 st.title("Chef AI")
 
 question = st.text_input("Ask a cooking question...")
@@ -17,12 +27,7 @@ def chef_ai(question):
         messages=[
             {
                 'role': 'system',
-                'content': """ You are a chef.
-                rules:
-                    - Be polite and friendly
-                    - Keep answers short and to the point
-                    - Suggest recipes and cooking tips
-                """
+                'content': SYSTEM_PROMPT
             },
             {
                 'role': 'user',
@@ -33,7 +38,12 @@ def chef_ai(question):
     return response['message']['content']
 
 if st.button("Send"):
-    if question and question.strip():
-        st.write(chef_ai(question))
+    # Bolt ⚡ Optimization:
+    # Normalize question (strip whitespace) before calling chef_ai() so queries with
+    # leading/trailing whitespace variations hit the @st.cache_data cache instead of
+    # causing cache misses and triggering unnecessary LLM backend calls.
+    normalized_question = question.strip() if question else ""
+    if normalized_question:
+        st.write(chef_ai(normalized_question))
     else:
         st.warning("Please enter a cooking question.")
