@@ -27,3 +27,10 @@ def test_chef_ai_valid_question_and_caching():
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
+
+        # Calling with leading/trailing whitespace normalized prior to chef_ai
+        # reuses the cached response without extra backend calls.
+        clean_q = "  How to boil pasta? \n".strip()
+        res3 = ai_assistance.chef_ai(clean_q)
+        assert res3 == 'Boil water and add pasta.'
+        assert mock_chat.call_count == 1
