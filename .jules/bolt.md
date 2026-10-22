@@ -1,0 +1,3 @@
+## 2026-10-22 - Streamlit @st.cache_data Input Normalization Pattern
+**Learning:** Streamlit's `@st.cache_data` uses exact input function arguments for hash-based cache keys. Normalizing parameters (e.g. whitespace stripping) inside the body of a cached function is too late for cache key hashing, causing whitespace variations to miss the cache and trigger expensive duplicate LLM calls.
+**Action:** Extract the cached function to an inner function (e.g., `_chef_ai_cached`), and perform parameter normalization in the outer wrapper function before invoking the cached function. Alias any instance attributes like `.clear` on the wrapper if needed for test isolation.
