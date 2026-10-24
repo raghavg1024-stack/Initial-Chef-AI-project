@@ -21,9 +21,20 @@ def test_chef_ai_valid_question_and_caching():
         res1 = ai_assistance.chef_ai("How to boil pasta?")
         assert res1 == 'Boil water and add pasta.'
         assert mock_chat.call_count == 1
+        mock_chat.assert_called_with(
+            model='mistral',
+            messages=[
+                ai_assistance.SYSTEM_MESSAGE,
+                {'role': 'user', 'content': 'How to boil pasta?'}
+            ]
+        )
 
         # Second call with identical input should be served from cache
         res2 = ai_assistance.chef_ai("How to boil pasta?")
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
         assert mock_chat.call_count == 1
+
+def test_system_message_structure():
+    assert ai_assistance.SYSTEM_MESSAGE['role'] == 'system'
+    assert "You are a chef." in ai_assistance.SYSTEM_MESSAGE['content']
