@@ -1,0 +1,3 @@
+## 2025-05-18 - Streamlit Cache Keys and Multiline Prompt Indentation
+**Learning:** In Streamlit apps with `@st.cache_data`, passing unstripped string inputs causes whitespace variations (e.g., trailing spaces) to produce distinct cache keys, missing the cache and triggering expensive LLM inferences. Additionally, Python multiline strings inside indented functions inherit code indentation whitespace, inflating LLM prompt token counts.
+**Action:** Always strip user query strings before passing to `@st.cache_data` decorated functions and define system prompts as static module constants without indentation.
