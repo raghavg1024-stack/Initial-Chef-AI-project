@@ -1,0 +1,3 @@
+## 2026-10-30 - Streamlit Cache Keys and String Normalization
+**Learning:** When decorating functions with `@st.cache_data`, arguments are hashed to generate cache keys. Passing raw user input with leading/trailing whitespace causes cache key misses even when input content is logically identical, resulting in redundant LLM invocations. Pre-allocating immutable system prompts at module level also eliminates redundant dictionary/string allocations per call.
+**Action:** Always normalize string arguments (e.g. `strip()`) before passing them to `@st.cache_data` decorated functions to ensure maximum cache hit efficiency for LLM calls.
