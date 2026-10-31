@@ -1,0 +1,3 @@
+## 2026-10-31 - Hoist LLM System Prompt and Normalize Cache Query Keys
+**Learning:** In Streamlit applications querying local LLMs (Ollama), defining prompt dictionaries inside the query function causes repeated dictionary/string re-allocations and includes indentation whitespace in prompt tokens, while unnormalized query strings result in cache misses for queries differing only by surrounding whitespace.
+**Action:** Extract static system message dictionaries to module scope and strip input query whitespace prior to passing into `@st.cache_data` functions to maximize cache hit rates and eliminate redundant LLM inference calls.
