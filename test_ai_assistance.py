@@ -21,6 +21,8 @@ def test_chef_ai_valid_question_and_caching():
         res1 = ai_assistance.chef_ai("How to boil pasta?")
         assert res1 == 'Boil water and add pasta.'
         assert mock_chat.call_count == 1
+        _, kwargs = mock_chat.call_args
+        assert kwargs.get("keep_alive") == "1h"
 
         # Second call with identical input should be served from cache
         res2 = ai_assistance.chef_ai("How to boil pasta?")
