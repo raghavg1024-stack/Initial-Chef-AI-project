@@ -6,8 +6,10 @@ def test_chef_ai_empty_question():
     with patch("ollama.chat") as mock_chat:
         res1 = ai_assistance.chef_ai("")
         res2 = ai_assistance.chef_ai("   ")
+        res3 = ai_assistance.chef_ai(None)
         assert res1 == ""
         assert res2 == ""
+        assert res3 == ""
         mock_chat.assert_not_called()
 
 def test_chef_ai_valid_question_and_caching():
@@ -26,4 +28,20 @@ def test_chef_ai_valid_question_and_caching():
         res2 = ai_assistance.chef_ai("How to boil pasta?")
         assert res2 == 'Boil water and add pasta.'
         # Call count remains 1 because cached output is returned without calling ollama.chat
+        assert mock_chat.call_count == 1
+
+def test_chef_ai_cache_normalization_whitespace():
+    with patch("ollama.chat") as mock_chat:
+        mock_chat.return_value = {'message': {'content': 'Preheat oven to 400 degrees.'}}
+
+        ai_assistance.chef_ai.clear()
+
+        # First call with leading/trailing spaces
+        res1 = ai_assistance.chef_ai("   How to roast potatoes?   ")
+        assert res1 == 'Preheat oven to 400 degrees.'
+        assert mock_chat.call_count == 1
+
+        # Second call with stripped version should hit cache without calling LLM
+        res2 = ai_assistance.chef_ai("How to roast potatoes?")
+        assert res2 == 'Preheat oven to 400 degrees.'
         assert mock_chat.call_count == 1
