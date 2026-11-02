@@ -1,0 +1,3 @@
+## 2026-11-02 - Streamlit Cache Key Normalization & Memory Bounds
+**Learning:** Streamlit's `@st.cache_data` hashes raw parameter values. If input parameters contain accidental variations such as leading/trailing whitespaces, identical user queries cause cache misses and re-trigger expensive backend operations (like LLM inferences). Furthermore, unconstrained `@st.cache_data` entries grow indefinitely in memory.
+**Action:** Always normalize string query inputs before delegating to `@st.cache_data` decorated helpers, and configure bounded caches with `max_entries` and `ttl`. Maintain helper attributes like `.clear` on wrapper functions to preserve testability.
