@@ -6,27 +6,37 @@ st.title("Chef AI")
 question = st.text_input("Ask a cooking question...")
 
 # Bolt ⚡ Optimization:
-# Cache response results with @st.cache_data so duplicate/identical cooking queries
-# do not trigger redundant and expensive calls to the Ollama LLM backend.
-@st.cache_data(show_spinner="Asking Chef AI...")
-def chef_ai(question):
-    if not question or not question.strip():
-        return ""
-    response = ollama.chat(
-        model='mistral',
-        messages=[
-            {
-                'role': 'system',
-                'content': """ You are a chef.
+# 1. Hoist constant system message prompt to avoid redundant dictionary allocations.
+# 2. Canonicalize query input (strip whitespace) before cache lookup so queries like
+#    "how to boil pasta" and "how to boil pasta   " share the same cache key.
+# 3. Limit cache size with `max_entries=256` to prevent unbounded memory growth.
+SYSTEM_MESSAGE = {
+    'role': 'system',
+    'content': """ You are a chef.
                 rules:
                     - Be polite and friendly
                     - Keep answers short and to the point
                     - Suggest recipes and cooking tips
                 """
-            },
+}
+
+@st.cache_data(show_spinner="Asking Chef AI...", max_entries=256)
+def chef_ai(question: str):
+    cleaned = question.strip() if question else ""
+    if not cleaned:
+        return ""
+    # Ensure cache key is canonicalized: if input had untrimmed whitespace,
+    # delegate to the trimmed key so it hits the same cached entry.
+    if question != cleaned:
+        return chef_ai(cleaned)
+
+    response = ollama.chat(
+        model='mistral',
+        messages=[
+            SYSTEM_MESSAGE,
             {
                 'role': 'user',
-                'content': question.strip()
+                'content': cleaned
             }
         ]
     )
