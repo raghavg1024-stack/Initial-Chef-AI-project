@@ -1,0 +1,3 @@
+## 2026-11-09 - Normalize Cache Keys Before Streamlit Memoization
+**Learning:** `@st.cache_data` hashes function argument values as raw inputs. When user input strings with varying leading or trailing whitespace are passed to a cached function, different cache entries are created for semantically identical queries, bypassing the cache and triggering redundant expensive LLM API invocations. Normalizing arguments before passing them into the cached inner function prevents cache misses.
+**Action:** When caching text-query or user-input functions with `@st.cache_data`, always preprocess/normalize strings (e.g. `strip()`) before they reach the cached function wrapper.
